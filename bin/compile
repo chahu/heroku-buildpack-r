@@ -39,17 +39,21 @@ else
   # download and unpack binaries
   echo "Downloading and unpacking R binaries" | indent
   mkdir -p $VENDOR_DIR && curl $R_BINARIES -s -o - | tar xzf - -C $VENDOR_DIR
+fi
+# need to copy the binaries to /app/vendor so that R works
+cp -R $VENDOR_DIR/* /app/vendor
 
-  # Let's download and compile libffi because dependencies on heroku are a shitshow
+
+# Check if libffi was cached or if we need to download/compile it
+if [ ! -d /app/vendor/lib/libffi-3.0.13 ]
+then
+  # download and compile libffi because dependencies on heroku are a shitshow
+  echo "Downloading and compiling libffi-3.0.13" | indent
   curl $LIBFFI_TARGZ | tar xzf - -C /tmp/
   cd /tmp/libffi-3.0.13/
   ./configure --prefix /app/vendor
   make install
 fi
-
-# need to copy the binaries to /app/vendor so that R works
-cp -R $VENDOR_DIR/* /app/vendor
-
 
 # R needs to know where gfortran and glibc header files are
 # For buildpacks that get run after, need to update PATH with location of R

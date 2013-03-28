@@ -19,6 +19,7 @@ BUILD_PACK_VERSION="20121005"
 R_VERSION="2.15.1"
 S3_BUCKET="heroku-buildpack-r"
 R_BINARIES="http://${S3_BUCKET}.s3.amazonaws.com/R-${R_VERSION}-binaries-${BUILD_PACK_VERSION}.tar.gz"
+LIBFFI_TARGZ="ftp://sourceware.org/pub/libffi/libffi-3.0.13.tar.gz"
 VENDOR_DIR="$BUILD_DIR/vendor"
 R_HOME="$VENDOR_DIR/R"
 CRAN_MIRROR="http://cran.fhcrc.org"
@@ -38,6 +39,12 @@ else
   # download and unpack binaries
   echo "Downloading and unpacking R binaries" | indent
   mkdir -p $VENDOR_DIR && curl $R_BINARIES -s -o - | tar xzf - -C $VENDOR_DIR
+
+  # Let's download and compile libffi because dependencies on heroku are a shitshow
+  curl $LIBFFI_TARGZ | tar xzf - -C /tmp/
+  cd /tmp/libffi-3.0.13/
+  ./configure --prefix /app/vendor
+  make install
 fi
 
 # need to copy the binaries to /app/vendor so that R works
@@ -50,6 +57,10 @@ export PATH=/app/vendor/R/bin/:/app/vendor/gcc-4.3/bin:$PATH
 export LDFLAGS="-L/app/vendor/gcc-4.3/lib64/"
 export CPPFLAGS="-I/app/vendor/glibc-2.7/string/ -I/app/vendor/glibc-2.7/time"
 export R_INCLUDE=/app/vendor/R/lib64/R/include
+
+export PKG_CONFIG_PATH=/app/vendor/lib/pkgconfig/
+export C_INCLUDE_PATH=/app/vendor/lib/libffi-3.0.13/include/
+export LD_LIBRARY_PATH=/app/vendor/lib/:$LD_LIBRARY_PATH
 
 # install dependencies from CRAN
 echo "Executing init.r script" | indent

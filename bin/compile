@@ -43,6 +43,14 @@ fi
 # need to copy the binaries to /app/vendor so that R works
 cp -R $VENDOR_DIR/* /app/vendor
 
+# DEBUGGING
+echo "Under $CACHE_DIR:"
+find "$CACHE_DIR" -maxdepth 3 -type d | egrep -v 'glibc|gcc|gems|ruby'
+echo "Under $VENDOR_DIR:"
+find "$VENDOR_DIR" -maxdepth 3 -type d | egrep -v 'glibc|gcc|gems|ruby'
+echo "Under /app/vendor:"
+find /app/vendor -maxdepth 3 -type d | egrep -v 'glibc|gcc|gems|ruby'
+
 
 # Check if libffi was cached or if we need to download/compile it
 if [ ! -d /app/vendor/lib/libffi-3.0.13 ]
@@ -86,3 +94,11 @@ mkdir -p $VENDOR_DIR $CACHE_DIR
 cp -R -f /app/vendor/* $VENDOR_DIR
 cp -R -f /app/vendor/* $CACHE_DIR
 echo "$R_VERSION" > $CACHE_DIR/R/bin/.version
+
+# DEBUGGING
+echo "Under $CACHE_DIR:"
+find "$CACHE_DIR" -maxdepth 3 -type d | egrep -v 'glibc|gcc|gems|ruby'
+echo "Under $VENDOR_DIR:"
+find "$VENDOR_DIR" -maxdepth 3 -type d | egrep -v 'glibc|gcc|gems|ruby'
+echo "Under /app/vendor:"
+find /app/vendor -maxdepth 3 -type d | egrep -v 'glibc|gcc|gems|ruby'
